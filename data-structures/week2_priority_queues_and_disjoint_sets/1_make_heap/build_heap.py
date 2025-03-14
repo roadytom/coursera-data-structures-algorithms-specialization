@@ -28,11 +28,14 @@ class HeapQ:
         return popped
 
     def sift_down(self, idx):
-        while self.has_child(idx) and self.larger_than_children(idx):
-            max_child_idx = self.get_left_child_idx(idx) if self.get_left_child(idx) < self.get_right_child(
-                idx) else self.get_right_child_idx(idx)
-            self.swap(idx, max_child_idx)
-            self.sift_down(max_child_idx)
+        min_idx = idx
+        if self.get_left_child_or_inf(idx) < self.data[min_idx]:
+            min_idx = self.get_left_child_idx(idx)
+        if self.get_right_child_or_inf(idx) < self.data[min_idx]:
+            min_idx = self.get_right_child_idx(idx)
+        if min_idx != idx:
+            self.swap(idx, min_idx)
+            self.sift_down(min_idx)
 
     def swap(self, idx1, idx2):
         if idx1 == idx2:
@@ -40,23 +43,19 @@ class HeapQ:
         self.swaps.append((idx1, idx2))
         self.data[idx1], self.data[idx2] = self.data[idx2], self.data[idx1]
 
-    def get_left_child(self, idx):
-        return self.data[self.get_left_child_idx(idx)]
+    def get_left_child_or_inf(self, idx):
+        left_child_idx = self.get_left_child_idx(idx)
+        return self.data[left_child_idx] if left_child_idx < len(self.data) else float("inf")
 
-    def get_right_child(self, idx):
-        return self.data[self.get_right_child_idx(idx)]
+    def get_right_child_or_inf(self, idx):
+        right_child_idx = self.get_right_child_idx(idx)
+        return self.data[right_child_idx] if right_child_idx < len(self.data) else float("inf")
 
     def sift_up(self, idx):
         while idx > 0 and self.data[idx] < self.get_parent(idx):
             parent_idx = self.get_parent_idx(idx)
             self.swap(parent_idx, idx)
             idx = parent_idx
-
-    def has_child(self, idx):
-        return self.get_left_child_idx(idx) < len(self.data)
-
-    def larger_than_children(self, idx):
-        return self.data[idx] > self.get_left_child(idx) or self.data[idx] > self.get_right_child(idx)
 
     def get_parent_idx(self, idx):
         return (idx - 1) // 2
