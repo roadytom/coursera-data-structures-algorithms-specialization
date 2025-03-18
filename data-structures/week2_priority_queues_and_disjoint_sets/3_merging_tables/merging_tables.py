@@ -16,13 +16,25 @@ class Database:
         if src_parent == dst_parent:
             return False
 
-        # merge two components
-        # use union by rank heuristic
-        # update max_row_count with the new maximum table size
-        return True
+        src_rank = self.ranks[src_parent]
+        dst_rank = self.ranks[dst_parent]
+        self.max_row_count = max(self.max_row_count, self.row_counts[src_parent] + self.row_counts[dst_parent])
+        if src_rank > dst_rank:
+            self.parents[dst_parent] = src_parent
+            self.row_counts[src_parent] += self.row_counts[dst_parent]
+        elif src_rank < dst_rank:
+            self.parents[src_parent] = dst_parent
+            self.row_counts[dst_parent] += self.row_counts[src_parent]
+        else:
+            self.ranks[src_parent] += 1
+            self.parents[dst_parent] = src_parent
+            self.row_counts[src_parent] += self.row_counts[dst_parent]
+        self.max_row_count = max(self.max_row_count, self.row_counts[src_parent], self.row_counts[dst_parent])
 
     def get_parent(self, table):
-        # find parent and compress path
+        if self.parents[table] == table:
+            return self.parents[table]
+        self.parents[table] = self.get_parent(self.parents[table])
         return self.parents[table]
 
 
